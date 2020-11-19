@@ -169,18 +169,18 @@ use crate::func::Function;
 use crate::types::Type;
 
 mod func;
-mod types;
 mod id;
+mod types;
 
 fn sample_function() -> Function {
     let bin = Type::new_prim("Bin");
-    let bin2 = Type::Sequence(vec![bin.clone(); 2]);
+    let bin2 = Type::FuncSeq(vec![bin.clone(); 2]);
 
     let top = Function::new_const("TOP", bin.clone());
     // let bot = Function::new_const("BOT", bin.clone());
     let x = Function::new_var("x", bin.clone());
     let y = Function::new_var("y", bin.clone());
-    
+
     let mut and = Function::new("AND", bin2, bin.clone()).with_inputs(vec![Some(x), Some(top)]);
     let mut not = Function::new("NOT", bin.clone(), bin).with_inputs(vec![Some(and)]);
     not.change_input(0, y);

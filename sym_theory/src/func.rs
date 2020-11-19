@@ -1,8 +1,8 @@
-use crate::types::Type;
+use crate::types::{Type, FuncType, FuncTypeError};
 
 #[derive(Clone)]
 pub struct Function {
-    ty: Type,
+    ty: FuncType,
     inputs: FuncSeq,
 }
 
@@ -13,11 +13,8 @@ pub struct FuncSeq {
 }
 
 impl FuncSeq {
-    pub fn new(fs: Vec<Function>) -> FuncSeq {
-        FuncSeq {
-            ty: Type::new_seq(&fs),
-            seq: fs,
-        }
+    pub fn new(fs: Vec<Function>) -> Result<FuncSeq, FuncTypeError> {
+        
     }
 }
 
@@ -26,46 +23,25 @@ pub enum CreateError {
 }
 
 impl Function {
-    pub fn new(label: &str, in_ty: Type, out_ty: Type) -> Function {
-        Function {
-            ty: Type::Function {
-                label: String::from(label),
-                input: Box::new(in_ty.clone()),
-                output: Box::new(out_ty),
-            },
-            inputs: Function::new_auto_vars(in_ty),
-        }
+    pub fn new(label: &str, in_ty: Type, out_ty: Type) -> Result<Function, FuncTypeError> {
+        Ok(Function {
+            ty: FuncType::new(label, &in_ty, &out_ty)?,
+            inputs: FuncSeq {
+                ty: in_ty.clone(),
+                seq: vec![]
+            }
+        })
     }
 
-    pub fn new_const(label: &str, ty: Type) -> Function {
+    pub fn from_inputs(label: &str, inputs: Vec<Function>, out_ty: Type) -> Result<Function, FuncTypeError> {
+        let inputs = FuncSeq::new(inputs)?;
+        Ok(Function {
+            ty: FuncType::new(label, &in_ty, &out_ty)?,
+            inputs,
+        })
+    }
+
+    pub fn new_const(label: &str, ty: Type) -> Result<Function, FuncTypeError> {
         Function::new(label, Type::Empty, ty)
-    }
-
-    pub fn new_var(label: &str, ty: Type) -> Function {
-        Function::new(label, Type::Unknown, ty)
-    }
-
-    pub fn new_auto_vars(ty: Type) -> Function {
-        match ty {
-            Type::Empty => Function::new("", Type::Empty, Type::Empty),
-            Type::Unknown => {}
-            Type::Primitive(_) => {}
-            Type::Function { .. } => {}
-            Type::Sequence(_) => {}
-        }
-    }
-
-    pub fn with_inputs(mut self, inputs: FuncSeq) -> Result<Function, CreateError> {
-        let Type::Function { output, .. } = &self.ty;
-        if output == inputs.ty {
-            self.inputs = inputs;
-            Ok(self)
-        } else {
-            Err(CreateError::InputTypeMismatch)
-        }
-    }
-
-    pub fn change_input(&mut self, ix: usize) {
-        self.ix ==
     }
 }
