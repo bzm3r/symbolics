@@ -1,7 +1,15 @@
+use::druid::Data;
+
 #[derive(Clone)]
 pub enum Type {
     Primitive(String),
     Sequence(TypeSeq),
+}
+
+impl Data for Type {
+    fn same(&self, other: &Self) -> bool {
+        self == other
+    }
 }
 
 impl PartialEq for Type {

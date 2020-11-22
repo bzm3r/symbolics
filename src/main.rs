@@ -1,19 +1,18 @@
-mod error;
-//mod interface;
 mod components;
-mod node;
-mod theory;
+// mod node;
+mod func;
+mod types;
 mod widgets;
 
 use crate::components::make_ui;
-// use crate::interface::{make_ui, Interface, State};
 
+use crate::func::Function;
+use crate::types::Type;
 use druid::{im::Vector, AppLauncher, Data, Lens, LocalizedString, PlatformError, WindowDesc};
-use node::Node;
 
 #[derive(Clone, Data, Lens)]
 pub struct AppState {
-    root: Node,
+    root: Function,
     // pub interface: Interface,
 }
 
@@ -29,13 +28,18 @@ pub fn main() -> Result<(), PlatformError> {
     // };
 
     // (x OR y) AND z
-    let z = Node::new("z");
-    let x = Node::new("x");
-    let y = Node::new("y");
-    let x_or_y = Node::new("OR").set_children(vec![x, y]);
-    let root = Node::new("AND").set_children(vec![x_or_y, z]);
+    let bin = Type::Primitive("Bin".into());
+    let bin2 = Type::from(vec![bin.clone(); 2]);
 
-    let data = AppState { root };
+    let top = Function::new_const("TOP", bin.clone());
+    // let bot = Function::new_const("BOT", bin.clone());
+    let x = Function::new_var("x", bin.clone());
+    let y = Function::new_var("y", bin.clone());
+
+    let mut and = Function::from_input("AND", vec![x, top], bin.clone());
+    let mut or = Function::from_input("OR", vec![y, and], bin.clone());
+    let mut not = Function::from_input("NOT", vec![or], bin);
+    let data = AppState { root: not };
 
     AppLauncher::with_window(main_window)
         .use_simple_logger()

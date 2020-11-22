@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
-use std::sync::Arc;
 use std::iter::Iterator;
+use std::sync::Arc;
 
 use druid::kurbo::{Point, Rect, Size};
 
@@ -9,18 +9,18 @@ use druid::{
     UpdateCtx, Widget, WidgetPod,
 };
 
-use crate::node::{Node};
 use crate::components::node;
+use crate::func::Function;
 
 /// A list widget for a variable-size collection of items.
-pub struct NodeList {
-    children: Vec<WidgetPod<Node, Box<dyn Widget<Node>>>>,
+pub struct FunctionList {
+    children: Vec<WidgetPod<Function, Box<dyn Widget<Function>>>>,
 }
 
-impl NodeList {
-    /// Create a new list widget. 
+impl FunctionList {
+    /// Create a new list widget.
     pub fn new() -> Self {
-        NodeList {
+        FunctionList {
             children: Vec::new(),
         }
     }
@@ -28,7 +28,7 @@ impl NodeList {
     /// When the widget is created or the data changes, create or remove children as needed
     ///
     /// Returns `true` if children were added or removed.
-    fn update_child_count(&mut self, data: &Node, _env: &Env) -> bool {
+    fn update_child_count(&mut self, data: &Function, _env: &Env) -> bool {
         let len = self.children.len();
         match len.cmp(&data.data_len()) {
             Ordering::Greater => self.children.truncate(data.data_len()),
@@ -44,8 +44,8 @@ impl NodeList {
     }
 }
 
-impl Widget<Node> for NodeList {
-    fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut Node, env: &Env) {
+impl Widget<Function> for FunctionList {
+    fn event(&mut self, ctx: &mut EventCtx, event: &Event, data: &mut Function, env: &Env) {
         // let mut children = self.children.iter_mut();
         // data.for_each_mut(|child_data, _| {
         //     if let Some(child) = children.next() {
@@ -54,7 +54,7 @@ impl Widget<Node> for NodeList {
         // });
     }
 
-    fn lifecycle(&mut self, ctx: &mut LifeCycleCtx, event: &LifeCycle, data: &Node, env: &Env) {
+    fn lifecycle(&mut self, ctx: &mut LifeCycleCtx, event: &LifeCycle, data: &Function, env: &Env) {
         if let LifeCycle::WidgetAdded = event {
             if self.update_child_count(data, env) {
                 ctx.children_changed();
@@ -69,7 +69,7 @@ impl Widget<Node> for NodeList {
         });
     }
 
-    fn update(&mut self, ctx: &mut UpdateCtx, _old_data: &Node, data: &Node, env: &Env) {
+    fn update(&mut self, ctx: &mut UpdateCtx, _old_data: &Function, data: &Function, env: &Env) {
         // we send update to children first, before adding or removing children;
         // this way we avoid sending update to newly added children, at the cost
         // of potentially updating children that are going to be removed.
@@ -85,7 +85,13 @@ impl Widget<Node> for NodeList {
         }
     }
 
-    fn layout(&mut self, ctx: &mut LayoutCtx, bc: &BoxConstraints, data: &Node, env: &Env) -> Size {
+    fn layout(
+        &mut self,
+        ctx: &mut LayoutCtx,
+        bc: &BoxConstraints,
+        data: &Function,
+        env: &Env,
+    ) -> Size {
         let mut width = bc.min().width;
         let mut y = 0.0;
 
@@ -121,7 +127,7 @@ impl Widget<Node> for NodeList {
         my_size
     }
 
-    fn paint(&mut self, ctx: &mut PaintCtx, data: &Node, env: &Env) {
+    fn paint(&mut self, ctx: &mut PaintCtx, data: &Function, env: &Env) {
         let mut children = self.children.iter_mut();
         data.iter().for_each(|child_data| {
             if let Some(child) = children.next() {
@@ -130,4 +136,3 @@ impl Widget<Node> for NodeList {
         });
     }
 }
-
