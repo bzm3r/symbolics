@@ -13,12 +13,11 @@ use crate::func::Function;
 // }
 
 pub fn node() -> impl Widget<Function> + 'static {
-    let label = Label::dynamic(|data: &Function, env: &Env| data.label.clone())
+    let label = Label::dynamic(|data: &Function, env: &Env| format!("{}", data))
         .padding(10.)
         .background(Color::BLACK)
         .border(Color::grey(0.6), 2.)
-        .rounded(3.)
-        .on_click(Function::click);
+        .rounded(3.);
     label
 }
 

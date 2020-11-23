@@ -30,8 +30,8 @@ impl FunctionList {
     /// Returns `true` if children were added or removed.
     fn update_child_count(&mut self, data: &Function, _env: &Env) -> bool {
         let len = self.children.len();
-        match len.cmp(&data.data_len()) {
-            Ordering::Greater => self.children.truncate(data.data_len()),
+        match len.cmp(&data.input_len()) {
+            Ordering::Greater => self.children.truncate(data.input_len()),
             Ordering::Less => data.iter().enumerate().for_each(|(i, _)| {
                 if i >= len {
                     let child = WidgetPod::new(node());
@@ -40,7 +40,7 @@ impl FunctionList {
             }),
             Ordering::Equal => (),
         }
-        len != data.data_len()
+        len != data.input_len()
     }
 }
 

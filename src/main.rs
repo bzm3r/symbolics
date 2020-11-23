@@ -32,13 +32,14 @@ pub fn main() -> Result<(), PlatformError> {
     let bin2 = Type::from(vec![bin.clone(); 2]);
 
     let top = Function::new_const("TOP", bin.clone());
-    // let bot = Function::new_const("BOT", bin.clone());
+    let bot = Function::new_const("BOT", bin.clone());
     let x = Function::new_var("x", bin.clone());
     let y = Function::new_var("y", bin.clone());
+    //let y = Function::from_input("y", vec![bot, top.clone()], bin.clone());
 
-    let mut and = Function::from_input("AND", vec![x, top], bin.clone());
-    let mut or = Function::from_input("OR", vec![y, and], bin.clone());
-    let mut not = Function::from_input("NOT", vec![or], bin);
+    let mut and = Function::new_concrete("AND", vec![x, top], bin.clone());
+    let mut or = Function::new_concrete("OR", vec![y, and], bin.clone());
+    let mut not = Function::new_concrete("NOT", vec![or], bin);
     let data = AppState { root: not };
 
     AppLauncher::with_window(main_window)

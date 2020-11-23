@@ -1,6 +1,6 @@
 use::druid::Data;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Type {
     Primitive(String),
     Sequence(TypeSeq),
@@ -52,7 +52,7 @@ impl From<Vec<Type>> for Type {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct TypeSeq {
     len: usize,
     seq: Vec<Type>,
