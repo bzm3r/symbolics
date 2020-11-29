@@ -1,16 +1,14 @@
 use std::cmp::Ordering;
 use std::iter::Iterator;
-use std::sync::Arc;
 
 use druid::kurbo::{Point, Rect, Size};
 
 use druid::{
-    BoxConstraints, Data, Env, Event, EventCtx, LayoutCtx, LifeCycle, LifeCycleCtx, PaintCtx,
+    BoxConstraints, Env, Event, EventCtx, LayoutCtx, LifeCycle, LifeCycleCtx, PaintCtx,
     UpdateCtx, Widget, WidgetPod,
 };
 
-use crate::components::node;
-use crate::func::Function;
+use crate::{func::Function, components::function};
 
 /// A list widget for a variable-size collection of items.
 pub struct FunctionList {
@@ -34,7 +32,7 @@ impl FunctionList {
             Ordering::Greater => self.children.truncate(data.input_len()),
             Ordering::Less => data.iter().enumerate().for_each(|(i, _)| {
                 if i >= len {
-                    let child = WidgetPod::new(node());
+                    let child = WidgetPod::new(function());
                     self.children.push(child.boxed());
                 }
             }),
@@ -62,7 +60,7 @@ impl Widget<Function> for FunctionList {
         }
 
         let mut children = self.children.iter_mut();
-        data.iter().for_each(|child_data| {
+        data.iter().for_each(|(_, child_data)| {
             if let Some(child) = children.next() {
                 child.lifecycle(ctx, event, child_data, env);
             }
@@ -74,7 +72,7 @@ impl Widget<Function> for FunctionList {
         // this way we avoid sending update to newly added children, at the cost
         // of potentially updating children that are going to be removed.
         let mut children = self.children.iter_mut();
-        data.iter().for_each(|child_data| {
+        data.iter().for_each(|(_, child_data)| {
             if let Some(child) = children.next() {
                 child.update(ctx, child_data, env);
             }
@@ -95,11 +93,13 @@ impl Widget<Function> for FunctionList {
         let mut width = bc.min().width;
         let mut y = 0.0;
 
-        let mut indent_x = 0.0;
+        let mut indent_x = 25.0;
 
         let mut paint_rect = Rect::ZERO;
         let mut children = self.children.iter_mut();
-        data.iter().for_each(|child_data| {
+        data.iter().for_each(|(indent_level, child_data)| {
+            dbg!(indent_level);
+            dbg!("{}", child_data);
             let child = match children.next() {
                 Some(child) => child,
                 None => {
@@ -112,9 +112,15 @@ impl Widget<Function> for FunctionList {
             );
             let child_size = child.layout(ctx, &child_bc, child_data, env);
             // let rect = Rect::from_origin_size(Point::new(0.0, y), child_size);
-            child.set_origin(ctx, child_data, env, Point::new(indent_x, y));
+            let indent = indent_x * (indent_level as f64);
+            child.set_origin(
+                ctx,
+                child_data,
+                env,
+                Point::new(indent, y),
+            );
             paint_rect = paint_rect.union(child.paint_rect());
-            width = width.max(child_size.width);
+            width = width.max(child_size.width + indent);
             y += child_size.height;
         });
 
@@ -129,7 +135,7 @@ impl Widget<Function> for FunctionList {
 
     fn paint(&mut self, ctx: &mut PaintCtx, data: &Function, env: &Env) {
         let mut children = self.children.iter_mut();
-        data.iter().for_each(|child_data| {
+        data.iter().for_each(|(_, child_data)| {
             if let Some(child) = children.next() {
                 child.paint(ctx, child_data, env);
             }

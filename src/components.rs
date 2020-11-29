@@ -1,18 +1,22 @@
 use crate::widgets::FunctionList;
 use crate::AppState;
-use druid::widget::prelude::*;
+use druid::widget::{Either, prelude::*};
 use druid::widget::{Flex, Label, WidgetExt};
 use druid::Color;
 
 use crate::func::Function;
 
-// fn node(date: Function) -> impl Widget<Function> {
+pub fn function_context() -> impl Widget<Option<Function>> {
+    let either = Either::new()
+    let label = Label::dynamic(|data: &Function, env: &Env| format!("{}", data))
+        .padding(10.)
+        .background(Color::BLACK)
+        .border(Color::grey(0.6), 2.)
+        .rounded(3.);
+    label
+}
 
-//     let label = Label::new(data.root)
-
-// }
-
-pub fn node() -> impl Widget<Function> + 'static {
+pub fn function() -> impl Widget<Function> {
     let label = Label::dynamic(|data: &Function, env: &Env| format!("{}", data))
         .padding(10.)
         .background(Color::BLACK)
@@ -23,6 +27,9 @@ pub fn node() -> impl Widget<Function> + 'static {
 
 pub fn make_ui() -> impl Widget<AppState> {
     let list = FunctionList::new();
-    let column = Flex::column().with_child(list.lens(AppState::root));
-    column
+    let fn_context = function_context();
+    let left_column = Flex::column().with_child(list.lens(AppState::root));
+    let right_column = Flex::column().with_child(fn_context.lens(AppState::root));
+    let row = Flex::row().with_child(left_column).with_child(right_column);
+    row.debug_paint_layout()
 }

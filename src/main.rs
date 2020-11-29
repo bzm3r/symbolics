@@ -8,13 +8,51 @@ use crate::components::make_ui;
 
 use crate::func::Function;
 use crate::types::Type;
-use druid::{im::Vector, AppLauncher, Data, Lens, LocalizedString, PlatformError, WindowDesc};
+use druid::{AppLauncher, Data, Lens, LocalizedString, PlatformError, WindowDesc, im::{Vector, vector}};
+use uuid::Uuid;
 
 #[derive(Clone, Data, Lens)]
 pub struct AppState {
     root: Function,
+    #[data(same_fn = "PartialEq::eq")]
+    selected: Option<Uuid>
     // pub interface: Interface,
 }
+
+struct SingleFunctionLens;
+
+
+
+impl Lens<AppState, Option<Function>> for SingleFunctionLens {
+    fn with<V, F: FnOnce(&Option<Function>) -> V>(&self, data: &AppState, f: F) -> V {
+        match data.selected {
+            Some(selected) => {
+                let function_context = data.root.by_id(&selected);
+                f(&function_context)
+            }
+            None => f(&None)
+        }
+    }
+
+    fn with_mut<V, F: FnOnce(&mut Option<Function>) -> V>(&self, data: &mut AppState, f: F) -> V {
+        todo!()
+    }
+}
+
+// impl Lens<AppState, Account> for ActiveAccount {
+//     fn with<V, F: FnOnce(&Account) -> V>(&self, data: &AppState, f: F) -> V {
+//         let active_id = data.account_list.active_account_id.clone().unwrap();
+//         let index = data.account_list.get_index_from_key(&active_id);
+//         f(&data.account_list.accounts[index])
+//     }
+
+//     fn with_mut<V, F: FnOnce(&mut Account) -> V>(&self, data: &mut AppState, f: F) -> V {
+//         let active_id = data.account_list.active_account_id.clone().unwrap();
+//         let index = data.account_list.get_index_from_key(&active_id);
+//         f(&mut data.account_list.accounts[index])
+//     }
+// }
+
 
 pub fn main() -> Result<(), PlatformError> {
     let main_window = WindowDesc::new(make_ui)
@@ -37,10 +75,10 @@ pub fn main() -> Result<(), PlatformError> {
     let y = Function::new_var("y", bin.clone());
     //let y = Function::from_input("y", vec![bot, top.clone()], bin.clone());
 
-    let mut and = Function::new_concrete("AND", vec![x, top], bin.clone());
-    let mut or = Function::new_concrete("OR", vec![y, and], bin.clone());
-    let mut not = Function::new_concrete("NOT", vec![or], bin);
-    let data = AppState { root: not };
+    let mut and = Function::new_concrete("AND", vector![x, top], bin.clone());
+    let mut or = Function::new_concrete("OR", vector![y, and], bin.clone());
+    let mut not = Function::new_concrete("NOT", vector![or], bin);
+    let data = AppState { root: not, selected: None, };
 
     AppLauncher::with_window(main_window)
         .use_simple_logger()

@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 druid = { git = "https://github.com/linebender/druid", rev = "cb16eb7", features = ["im"] }
+uuid = { version = "0.8", features = ["v4"] }
